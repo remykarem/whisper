@@ -1,7 +1,6 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::Stream;
 use rubato::{InterpolationParameters, InterpolationType, Resampler, SincFixedIn, WindowFunction};
-use std::env::args;
 use std::sync::mpsc::{self, Receiver, SyncSender};
 use std::time::{Duration, Instant};
 use whisper_rs::{convert_stereo_to_mono_audio, FullParams, SamplingStrategy, WhisperContext};
@@ -11,6 +10,13 @@ const SILENCE_DURATION: Duration = Duration::from_secs(2);
 const AUDIO_BUFFER: usize = 512;
 const INPUT_SAMPLE_RATE: usize = 44_100;
 const OUTPUT_SAMPLE_RATE: usize = 16_000;
+
+struct Stt {
+    ctx: WhisperContext,
+    audio_data: Vec<f32>,
+    audio_receiver: Receiver<f32>,
+    stream: cpal::platform::Stream,
+}
 
 fn audio_input_stream_data_callback(
     raw_stereo_samples: &[f32],
@@ -83,54 +89,46 @@ fn create_paused_audio_stream(tx: SyncSender<f32>) -> Stream {
     stream
 }
 
-fn run_voice_activity_detection(rx: &Receiver<f32>, audio_data: &mut Vec<f32>) {
-    // Record until silence is detected
-    let mut last_voice_activity = Instant::now();
-    while last_voice_activity.elapsed() < SILENCE_DURATION {
-        if let Ok(sample) = rx.try_recv() {
-            // Check for voice activity
-            if sample.abs() > VOLUME_THRESHOLD {
-                last_voice_activity = Instant::now();
-            }
+impl Stt {
+    pub fn new(path_to_model: String) -> Self {
+        let ctx = WhisperContext::new(&path_to_model).expect("failed to load model");
 
-            // Add the sample to the audio_data buffer
-            audio_data.push(sample);
+        let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 0 });
+        params.set_n_threads(1);
+        params.set_translate(true);
+        params.set_language(Some("en"));
+        params.set_print_special(false);
+        params.set_print_progress(false);
+        params.set_print_realtime(false);
+        params.set_print_timestamps(false);
+
+        let (tx, audio_receiver) = mpsc::sync_channel(AUDIO_BUFFER);
+
+        // Create an audio stream
+        let stream = create_paused_audio_stream(tx);
+
+        Self {
+            ctx,
+            audio_data: Vec::new(),
+            audio_receiver,
+            stream,
         }
     }
-}
 
-fn main() {
-    // CLI arguments
-    let args: Vec<String> = args().collect();
-    if args.len() != 2 {
-        println!("Usage: whisper-agent <path_to_model>");
-        return;
-    }
-    let path_to_model = &args[1];
-
-    // Create a buffer to store the recorded audio
-    let mut audio_data = Vec::new();
-
-    // Load a context and model
-    let mut ctx = WhisperContext::new(path_to_model).expect("failed to load model");
-
-    // Channel for sending recorded data from the input callback to the main thread
-    let (tx, rx) = mpsc::sync_channel(AUDIO_BUFFER);
-
-    // Create an audio stream
-    let stream = create_paused_audio_stream(tx);
-
-    loop {
+    /// Record until no voice activity is detected, then output the text.
+    pub fn record(&mut self) -> String {
         // Start recording
         println!("Start recording");
-        stream.play().expect("Failed to start recording");
+        self.stream.play().expect("Failed to start recording");
 
         // Get the audio data from the input stream and run voice activity detection
-        run_voice_activity_detection(&rx, &mut audio_data);
+        self.run_voice_activity_detection();
 
         // Pause the stream
-        stream.pause().expect("Failed to pause stream");
+        self.stream.pause().expect("Failed to pause stream");
 
+        // Not sure how we store this value somewhere in the struct
+        // without having to initialise it every time
         let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 0 });
         params.set_n_threads(1);
         params.set_translate(true);
@@ -142,44 +140,56 @@ fn main() {
 
         // Run the Whisper ASR model
         println!("Run ASR model");
-        ctx.full(params, &audio_data[..])
+        self.ctx
+            .full(params, &self.audio_data[..])
             .expect("failed to run model");
 
         // Clear the audio data
-        audio_data.clear();
+        self.audio_data.clear();
 
         // Fetch the results
-        let num_segments = ctx.full_n_segments();
-        for i in 0..num_segments {
-            let segment = ctx.full_get_segment_text(i).expect("failed to get segment");
-            println!("{}", segment);
+        let num_segments = self.ctx.full_n_segments();
+
+        (0..num_segments)
+            .map(|i| {
+                self.ctx
+                    .full_get_segment_text(i)
+                    .expect("failed to get segment")
+                    .trim()
+                    .to_string()
+            })
+            .filter(|segment| segment != "[BLANK_AUDIO]")
+            .collect::<Vec<String>>()
+            .join("")
+    }
+
+    pub fn record_streaming() -> String {
+        todo!("Not yet implemented")
+    }
+
+    /// Simple voice activity detection using silence duration.
+    ///
+    /// Note that this function will block the main thread,
+    /// while the audio data is being processed concurrently
+    /// through the audio input stream
+    fn run_voice_activity_detection(&mut self) {
+        let mut last_voice_activity = Instant::now();
+        while last_voice_activity.elapsed() < SILENCE_DURATION {
+            if let Ok(sample) = self.audio_receiver.try_recv() {
+                // Check for voice activity
+                if sample.abs() > VOLUME_THRESHOLD {
+                    last_voice_activity = Instant::now();
+                }
+
+                // Add the sample to the audio_data buffer
+                self.audio_data.push(sample);
+            }
         }
     }
 }
 
-fn _empty() {
-    // Create a WavWriter to save the recorded audio
-    // let spec = WavSpec {
-    //     channels: input_config.channels as _,
-    //     sample_rate: input_config.sample_rate.0,
-    //     bits_per_sample: 16,
-    //     sample_format: hound::SampleFormat::Int,
-    // };
-
-    // let file = File::create("recorded_audio.wav").unwrap();
-    // let writer = BufWriter::new(file);
-    // let mut wav_writer = WavWriter::new(writer, spec).unwrap();
-
-    // Record for 10 seconds
-    // let record_duration = Duration::from_secs(10);
-    // let start_time = std::time::Instant::now();
-    // while start_time.elapsed() < record_duration {
-    //     if let Ok(sample) = rx.try_recv() {
-    //         wav_writer.write_sample(sample).unwrap();
-    //     }
-    // }
-
-    // Finalize the WAV file
-    // wav_writer.finalize().unwrap();
-    // println!("Recording saved to 'recorded_audio.wav'");
+fn main() {
+    let mut stt = Stt::new("ggml-tiny.en.bin".to_string());
+    let text = stt.record();
+    println!("{}", text);
 }
