@@ -1,6 +1,7 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::Stream;
 use rubato::{InterpolationParameters, InterpolationType, Resampler, SincFixedIn, WindowFunction};
+use std::env::args;
 use std::sync::mpsc::{self, Receiver, SyncSender};
 use std::time::{Duration, Instant};
 use whisper_rs::{convert_stereo_to_mono_audio, FullParams, SamplingStrategy, WhisperContext};
@@ -8,7 +9,6 @@ use whisper_rs::{convert_stereo_to_mono_audio, FullParams, SamplingStrategy, Whi
 const VOLUME_THRESHOLD: f32 = 0.05;
 const SILENCE_DURATION: Duration = Duration::from_secs(2);
 const AUDIO_BUFFER: usize = 512;
-const PATH_TO_MODEL: &str = "ggml-tiny.en.bin";
 const INPUT_SAMPLE_RATE: usize = 44_100;
 const OUTPUT_SAMPLE_RATE: usize = 16_000;
 
@@ -100,11 +100,19 @@ fn run_voice_activity_detection(rx: &Receiver<f32>, audio_data: &mut Vec<f32>) {
 }
 
 fn main() {
+    // CLI arguments
+    let args: Vec<String> = args().collect();
+    if args.len() != 2 {
+        println!("Usage: whisper-agent <path_to_model>");
+        return;
+    }
+    let path_to_model = &args[1];
+
     // Create a buffer to store the recorded audio
     let mut audio_data = Vec::new();
 
     // Load a context and model
-    let mut ctx = WhisperContext::new(PATH_TO_MODEL).expect("failed to load model");
+    let mut ctx = WhisperContext::new(path_to_model).expect("failed to load model");
 
     // Channel for sending recorded data from the input callback to the main thread
     let (tx, rx) = mpsc::sync_channel(AUDIO_BUFFER);

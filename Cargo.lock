@@ -3,21 +3,6 @@
 version = 3
 
 [[package]]
-name = "agent"
-version = "0.1.0"
-dependencies = [
- "cpal",
- "dasp",
- "dasp_interpolate",
- "dasp_signal",
- "hound",
- "rubato",
- "tokio",
- "webrtc-vad",
- "whisper-rs",
-]
-
-[[package]]
 name = "alsa"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -194,123 +179,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "dasp"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7381b67da416b639690ac77c73b86a7b5e64a29e31d1f75fb3b1102301ef355a"
-dependencies = [
- "dasp_envelope",
- "dasp_frame",
- "dasp_interpolate",
- "dasp_peak",
- "dasp_ring_buffer",
- "dasp_rms",
- "dasp_sample",
- "dasp_signal",
- "dasp_slice",
- "dasp_window",
-]
-
-[[package]]
-name = "dasp_envelope"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ec617ce7016f101a87fe85ed44180839744265fae73bb4aa43e7ece1b7668b6"
-dependencies = [
- "dasp_frame",
- "dasp_peak",
- "dasp_ring_buffer",
- "dasp_rms",
- "dasp_sample",
-]
-
-[[package]]
-name = "dasp_frame"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2a3937f5fe2135702897535c8d4a5553f8b116f76c1529088797f2eee7c5cd6"
-dependencies = [
- "dasp_sample",
-]
-
-[[package]]
-name = "dasp_interpolate"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fc975a6563bb7ca7ec0a6c784ead49983a21c24835b0bc96eea11ee407c7486"
-dependencies = [
- "dasp_frame",
- "dasp_ring_buffer",
- "dasp_sample",
-]
-
-[[package]]
-name = "dasp_peak"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cf88559d79c21f3d8523d91250c397f9a15b5fc72fbb3f87fdb0a37b79915bf"
-dependencies = [
- "dasp_frame",
- "dasp_sample",
-]
-
-[[package]]
-name = "dasp_ring_buffer"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07d79e19b89618a543c4adec9c5a347fe378a19041699b3278e616e387511ea1"
-
-[[package]]
-name = "dasp_rms"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6c5dcb30b7e5014486e2822537ea2beae50b19722ffe2ed7549ab03774575aa"
-dependencies = [
- "dasp_frame",
- "dasp_ring_buffer",
- "dasp_sample",
-]
-
-[[package]]
 name = "dasp_sample"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c87e182de0887fd5361989c677c4e8f5000cd9491d6d563161a8f3a5519fc7f"
-
-[[package]]
-name = "dasp_signal"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa1ab7d01689c6ed4eae3d38fe1cea08cba761573fbd2d592528d55b421077e7"
-dependencies = [
- "dasp_envelope",
- "dasp_frame",
- "dasp_interpolate",
- "dasp_peak",
- "dasp_ring_buffer",
- "dasp_rms",
- "dasp_sample",
- "dasp_window",
-]
-
-[[package]]
-name = "dasp_slice"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e1c7335d58e7baedafa516cb361360ff38d6f4d3f9d9d5ee2a2fc8e27178fa1"
-dependencies = [
- "dasp_frame",
- "dasp_sample",
-]
-
-[[package]]
-name = "dasp_window"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99ded7b88821d2ce4e8b842c9f1c86ac911891ab89443cc1de750cae764c5076"
-dependencies = [
- "dasp_sample",
-]
 
 [[package]]
 name = "either"
@@ -329,21 +201,6 @@ name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
-
-[[package]]
-name = "hermit-abi"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee512640fe35acbfb4bb779db6f0d80704c2cacfa2e39b601ef3e3f47d1ae4c7"
-dependencies = [
- "libc",
-]
-
-[[package]]
-name = "hound"
-version = "3.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d13cdbd5dbb29f9c88095bbdc2590c9cba0d0a1269b983fef6b2cdd7e9f4db1"
 
 [[package]]
 name = "indexmap"
@@ -476,18 +333,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 
 [[package]]
-name = "mio"
-version = "0.8.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b9d9a46eff5b4ff64b45a9e316a6d1e0bc719ef429cbec4dc630684212bfdf9"
-dependencies = [
- "libc",
- "log",
- "wasi",
- "windows-sys",
-]
-
-[[package]]
 name = "ndk"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -577,16 +422,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num_cpus"
-version = "1.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fac9e2da13b5eb447a6ce3d392f23a29d8694bff781bf03a16cd9ac8697593b"
-dependencies = [
- "hermit-abi",
- "libc",
-]
-
-[[package]]
 name = "num_enum"
 version = "0.5.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -664,12 +499,6 @@ name = "peeking_take_while"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19b17cddbe7ec3f8bc800887bab5e717348c95ea2ca0b1bf0837fb964dc67099"
-
-[[package]]
-name = "pin-project-lite"
-version = "0.2.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e0a7ae3ac2f1173085d398531c705756c94a4c56843785df85a60c1a0afac116"
 
 [[package]]
 name = "pkg-config"
@@ -808,29 +637,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43b2853a4d09f215c24cc5489c992ce46052d359b5109343cbafbf26bc62f8a3"
 
 [[package]]
-name = "signal-hook-registry"
-version = "1.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8229b473baa5980ac72ef434c4415e70c4b5e71b423043adb4ba059f89c99a1"
-dependencies = [
- "libc",
-]
-
-[[package]]
 name = "smallvec"
 version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
-
-[[package]]
-name = "socket2"
-version = "0.4.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64a4a911eed85daf18834cfaa86a79b7d266ff93ff5ba14005426219480ed662"
-dependencies = [
- "libc",
- "winapi",
-]
 
 [[package]]
 name = "strength_reduce"
@@ -874,36 +684,6 @@ name = "thiserror-impl"
 version = "1.0.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f9456a42c5b0d803c8cd86e73dd7cc9edd429499f37a3550d286d5e86720569f"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.12",
-]
-
-[[package]]
-name = "tokio"
-version = "1.27.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0de47a4eecbe11f498978a9b29d792f0d2692d1dd003650c24c76510e3bc001"
-dependencies = [
- "autocfg",
- "bytes",
- "libc",
- "mio",
- "num_cpus",
- "parking_lot",
- "pin-project-lite",
- "signal-hook-registry",
- "socket2",
- "tokio-macros",
- "windows-sys",
-]
-
-[[package]]
-name = "tokio-macros"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61a573bdc87985e9d6ddeed1b3d864e8a302c847e40d647746df2f1de209d1ce"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -958,12 +738,6 @@ dependencies = [
  "same-file",
  "winapi-util",
 ]
-
-[[package]]
-name = "wasi"
-version = "0.11.0+wasi-snapshot-preview1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "wasm-bindgen"
@@ -1042,15 +816,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "webrtc-vad"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39a1e40fd6ca90be95459152a2537f2ba4286ee1b13073f7ebcaa74fc94e3008"
-dependencies = [
- "cc",
-]
-
-[[package]]
 name = "which"
 version = "4.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1059,6 +824,15 @@ dependencies = [
  "either",
  "libc",
  "once_cell",
+]
+
+[[package]]
+name = "whisper-agent"
+version = "0.1.0"
+dependencies = [
+ "cpal",
+ "rubato",
+ "whisper-rs",
 ]
 
 [[package]]
