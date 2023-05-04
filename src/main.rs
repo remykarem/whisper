@@ -147,9 +147,11 @@ impl Stt {
         params.set_print_realtime(false);
         params.set_print_timestamps(false);
 
+        let mut state = self.ctx.create_state().expect("failed to create state");
+
         // Run the Whisper ASR model
         println!("Run ASR model");
-        self.ctx
+        state
             .full(params, &self.audio_data[..])
             .expect("failed to run model");
 
@@ -157,11 +159,11 @@ impl Stt {
         self.audio_data.clear();
 
         // Fetch the results
-        let num_segments = self.ctx.full_n_segments();
+        let num_segments = state.full_n_segments().expect("failed to get segments");
 
         (0..num_segments)
             .map(|i| {
-                self.ctx
+                state
                     .full_get_segment_text(i)
                     .expect("failed to get segment")
                     .trim()

@@ -179,6 +179,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "dashmap"
+version = "5.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "907076dfda823b0b36d2a1bb5f90c96660a5bbcd7729e10727f07858f22c4edc"
+dependencies = [
+ "cfg-if",
+ "hashbrown",
+ "lock_api",
+ "once_cell",
+ "parking_lot_core",
+]
+
+[[package]]
 name = "dasp_sample"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -828,7 +841,7 @@ dependencies = [
 
 [[package]]
 name = "whisper-agent"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "cpal",
  "rubato",
@@ -837,16 +850,17 @@ dependencies = [
 
 [[package]]
 name = "whisper-rs"
-version = "0.5.0"
-source = "git+https://github.com/tazz4843/whisper-rs.git?rev=6e70e56#6e70e56156f9a833ccf95c7ce70e915181e4953a"
+version = "0.6.0"
+source = "git+https://github.com/tazz4843/whisper-rs.git#b5072d486d9d47524afc966784060971820e8275"
 dependencies = [
+ "dashmap",
  "whisper-rs-sys",
 ]
 
 [[package]]
 name = "whisper-rs-sys"
-version = "0.3.2"
-source = "git+https://github.com/tazz4843/whisper-rs.git?rev=6e70e56#6e70e56156f9a833ccf95c7ce70e915181e4953a"
+version = "0.4.0"
+source = "git+https://github.com/tazz4843/whisper-rs.git#b5072d486d9d47524afc966784060971820e8275"
 dependencies = [
  "bindgen",
 ]
