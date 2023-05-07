@@ -1,6 +1,6 @@
 [package]
 name = "whisper-agent"
-version = "0.1.0"
+version = "0.1.2"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 cpal = "0.15.2"
 rubato = "0.12.0"
-whisper-rs = "0.5.0"
+whisper-rs = { git = "https://github.com/tazz4843/whisper-rs.git" }

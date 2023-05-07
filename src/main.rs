@@ -1,8 +1,14 @@
-use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use cpal::Stream;
+use std::{
+    env, process,
+    sync::mpsc::{self, Receiver, SyncSender},
+    time::{Duration, Instant},
+};
+
+use cpal::{
+    traits::{DeviceTrait, HostTrait, StreamTrait},
+    Stream,
+};
 use rubato::{InterpolationParameters, InterpolationType, Resampler, SincFixedIn, WindowFunction};
-use std::sync::mpsc::{self, Receiver, SyncSender};
-use std::time::{Duration, Instant};
 use whisper_rs::{convert_stereo_to_mono_audio, FullParams, SamplingStrategy, WhisperContext};
 
 const VOLUME_THRESHOLD: f32 = 0.05;
@@ -15,7 +21,7 @@ struct Stt {
     ctx: WhisperContext,
     audio_data: Vec<f32>,
     audio_receiver: Receiver<f32>,
-    stream: cpal::platform::Stream,
+    stream: Stream,
 }
 
 fn audio_input_stream_data_callback(
@@ -27,7 +33,10 @@ fn audio_input_stream_data_callback(
     let raw_mono_samples: Vec<f32> = convert_stereo_to_mono_audio(raw_stereo_samples).unwrap();
 
     // Resample the audio to get the target sample rate
-    let mut mono_samples = resampler.process(&[raw_mono_samples], None).unwrap();
+    // TODO: Fix 'Wrong number of frames X in input channel 0, expected Y'
+    let mut mono_samples = resampler
+        .process(&[raw_mono_samples], None)
+        .expect("failed to resample");
 
     // Send the audio to the main thread
     mono_samples.pop().unwrap().into_iter().for_each(|sample| {
@@ -138,9 +147,11 @@ impl Stt {
         params.set_print_realtime(false);
         params.set_print_timestamps(false);
 
+        let mut state = self.ctx.create_state().expect("failed to create state");
+
         // Run the Whisper ASR model
         println!("Run ASR model");
-        self.ctx
+        state
             .full(params, &self.audio_data[..])
             .expect("failed to run model");
 
@@ -148,11 +159,11 @@ impl Stt {
         self.audio_data.clear();
 
         // Fetch the results
-        let num_segments = self.ctx.full_n_segments();
+        let num_segments = state.full_n_segments().expect("failed to get segments");
 
         (0..num_segments)
             .map(|i| {
-                self.ctx
+                state
                     .full_get_segment_text(i)
                     .expect("failed to get segment")
                     .trim()
@@ -161,10 +172,6 @@ impl Stt {
             .filter(|segment| segment != "[BLANK_AUDIO]")
             .collect::<Vec<String>>()
             .join("")
-    }
-
-    pub fn record_streaming() -> String {
-        todo!("Not yet implemented")
     }
 
     /// Simple voice activity detection using silence duration.
@@ -189,7 +196,12 @@ impl Stt {
 }
 
 fn main() {
-    let mut stt = Stt::new("ggml-tiny.en.bin".to_string());
+    let Some(model) = env::args().nth(1) else {
+        println!("Please provide a path to the model file");
+        process::exit(1);
+    };
+
+    let mut stt = Stt::new(model);
     let text = stt.record();
     println!("{}", text);
 }
